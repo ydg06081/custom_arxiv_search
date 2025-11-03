@@ -5,12 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>arXiv 논문 검색 시스템</title>
     <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
     <div class="container">
         <!-- 헤더 -->
         <header>
-            <h1>📚 arXiv 논문 검색 시스템</h1>
+            <div class="header-icon">
+                <i data-lucide="book-open"></i>
+            </div>
+            <h1>arXiv 논문 검색 시스템</h1>
             <p class="subtitle">Gemini AI 기반 스마트 논문 검색</p>
         </header>
 
@@ -25,21 +29,30 @@
                 >
                 <button id="search-btn" class="btn btn-primary">
                     <span class="btn-text">검색</span>
-                    <span class="spinner" style="display: none;">⏳</span>
+                    <i data-lucide="search" class="btn-icon"></i>
+                    <span class="spinner" style="display: none;">
+                        <i data-lucide="loader-2" class="animate-spin"></i>
+                    </span>
                 </button>
             </div>
         </section>
 
         <!-- 현재 검색 주제 표시 -->
         <div id="current-topic" class="current-topic" style="display: none;">
-            <span class="label">현재 검색 주제:</span>
-            <span id="current-topic-text"></span>
+            <i data-lucide="bookmark"></i>
+            <div>
+                <span class="label">현재 검색 주제</span>
+                <span id="current-topic-text"></span>
+            </div>
         </div>
 
         <!-- 하위 주제 카드 섹션 -->
         <section id="subtopics-section" class="section" style="display: none;">
             <div class="section-header">
-                <h2>🔍 세분화된 연구 주제</h2>
+                <div class="section-icon">
+                    <i data-lucide="layers"></i>
+                </div>
+                <h2>세분화된 연구 주제</h2>
                 <p class="section-desc">AI가 분석한 3가지 핵심 연구 방향을 확인하고, 원하는 주제를 선택해 보세요</p>
             </div>
             <div id="subtopics-container" class="subtopics-grid"></div>
@@ -48,13 +61,23 @@
         <!-- 논문 검색 결과 섹션 -->
         <section id="results-section" class="section" style="display: none;">
             <div class="results-header">
-                <h2>📄 검색 결과</h2>
+                <div class="results-title">
+                    <i data-lucide="file-text"></i>
+                    <h2>검색 결과</h2>
+                </div>
                 <div class="results-actions">
-                    <button id="select-all-btn" class="btn btn-secondary">전체 선택</button>
-                    <button id="download-btn" class="btn btn-success" disabled>
-                        다운로드 (<span id="selected-count">0</span>)
+                    <button id="select-all-btn" class="btn btn-secondary">
+                        <i data-lucide="check-square"></i>
+                        <span>전체 선택</span>
                     </button>
-                    <button id="back-btn" class="btn btn-secondary">다시 검색</button>
+                    <button id="download-btn" class="btn btn-success" disabled>
+                        <i data-lucide="download"></i>
+                        <span>다운로드 (<span id="selected-count">0</span>)</span>
+                    </button>
+                    <button id="back-btn" class="btn btn-secondary">
+                        <i data-lucide="arrow-left"></i>
+                        <span>다시 검색</span>
+                    </button>
                 </div>
             </div>
             <div id="papers-container" class="papers-list"></div>
@@ -62,7 +85,9 @@
 
         <!-- 로딩 표시 -->
         <div id="loading" class="loading" style="display: none;">
-            <div class="spinner-large">⏳</div>
+            <div class="spinner-large">
+                <i data-lucide="loader-2" class="animate-spin"></i>
+            </div>
             <p>검색 중입니다...</p>
         </div>
 
@@ -71,6 +96,10 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        // Lucide 아이콘 초기화
+        lucide.createIcons();
+    </script>
 </body>
 </html>
 

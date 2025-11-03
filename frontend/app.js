@@ -42,9 +42,18 @@ async function handleSearch() {
     
     hideError();
     showLoading();
+    searchBtn.disabled = true;
     hideSection(subtopicsSection);
     hideSection(resultsSection);
     hideSection(currentTopicDiv);
+    
+    // 버튼 로딩 상태
+    const btnText = searchBtn.querySelector('.btn-text');
+    const btnIcon = searchBtn.querySelector('.btn-icon');
+    const spinner = searchBtn.querySelector('.spinner');
+    if (btnText) btnText.style.display = 'none';
+    if (btnIcon) btnIcon.style.display = 'none';
+    if (spinner) spinner.style.display = 'inline-flex';
     
     try {
         const response = await fetch(`${API_BASE_URL}/api/expand`, {
@@ -70,6 +79,15 @@ async function handleSearch() {
         showError('검색 중 오류가 발생했습니다. Gemini API 키를 확인해주세요.');
     } finally {
         hideLoading();
+        searchBtn.disabled = false;
+        
+        // 버튼 원래 상태로
+        if (btnText) btnText.style.display = 'inline';
+        if (btnIcon) btnIcon.style.display = 'inline';
+        if (spinner) spinner.style.display = 'none';
+        
+        // Lucide 아이콘 다시 초기화
+        lucide.createIcons();
     }
 }
 
@@ -81,9 +99,18 @@ function displaySubtopics(subtopics) {
         const card = document.createElement('div');
         card.className = 'subtopic-card';
         card.innerHTML = `
-            <h3>${subtopic.title}</h3>
-            <p>${subtopic.description}</p>
-            <button class="search-btn" data-index="${index}">이 주제로 검색</button>
+            <div class="subtopic-header">
+                <span class="subtopic-number">주제 ${index + 1}</span>
+            </div>
+            <h3 class="subtopic-title">${escapeHtml(subtopic.title)}</h3>
+            <div class="subtopic-divider"></div>
+            <div class="subtopic-description">
+                <p>${escapeHtml(subtopic.description)}</p>
+            </div>
+            <button class="search-btn" data-index="${index}">
+                <span>이 주제로 검색</span>
+                <i data-lucide="arrow-right"></i>
+            </button>
         `;
         
         const searchButton = card.querySelector('.search-btn');
@@ -91,6 +118,9 @@ function displaySubtopics(subtopics) {
         
         subtopicsContainer.appendChild(card);
     });
+    
+    // Lucide 아이콘 다시 초기화
+    lucide.createIcons();
 }
 
 // 선택된 하위 주제로 논문 검색
@@ -102,6 +132,9 @@ async function searchWithSubtopic(subtopic) {
     // 현재 검색 주제 표시
     currentTopicText.textContent = subtopic.title;
     showSection(currentTopicDiv);
+    
+    // Lucide 아이콘 다시 초기화
+    lucide.createIcons();
     
     try {
         const response = await fetch(
@@ -134,7 +167,7 @@ function displayPapers(papers) {
     papersContainer.innerHTML = '';
     
     if (papers.length === 0) {
-        papersContainer.innerHTML = '<p style="text-align: center; color: var(--text-secondary); padding: 40px;">검색 결과가 없습니다.</p>';
+        papersContainer.innerHTML = '<p style="text-align: center; color: var(--muted-foreground); padding: 40px;">검색 결과가 없습니다.</p>';
         return;
     }
     
@@ -150,8 +183,11 @@ function displayPapers(papers) {
                     <h3 class="paper-title">${escapeHtml(paper.title)}</h3>
                     <p class="paper-authors">저자: ${escapeHtml(paper.authors)}</p>
                     <p class="paper-date">발행일: ${paper.published}</p>
-                    <p class="paper-summary">${escapeHtml(truncateText(paper.summary, 300))}</p>
-                    ${paper.pdf_url ? `<a href="${paper.pdf_url}" target="_blank" class="paper-link">PDF 보기 →</a>` : ''}
+                    <p class="paper-summary">${escapeHtml(truncateText(paper.summary, 500))}</p>
+                    ${paper.pdf_url ? `<a href="${paper.pdf_url}" target="_blank" class="paper-link">
+                        <span>PDF 보기</span>
+                        <i data-lucide="external-link"></i>
+                    </a>` : ''}
                 </div>
             </div>
         `;
@@ -170,6 +206,9 @@ function displayPapers(papers) {
         
         papersContainer.appendChild(paperDiv);
     });
+    
+    // Lucide 아이콘 다시 초기화
+    lucide.createIcons();
 }
 
 // 전체 선택/해제 토글
@@ -199,7 +238,11 @@ function updateDownloadButton() {
     const count = selectedPaperIds.size;
     selectedCountSpan.textContent = count;
     downloadBtn.disabled = count === 0;
-    selectAllBtn.textContent = count === currentPapers.length ? '전체 해제' : '전체 선택';
+    
+    const selectAllBtnText = selectAllBtn.querySelector('span');
+    if (selectAllBtnText) {
+        selectAllBtnText.textContent = count === currentPapers.length ? '전체 해제' : '전체 선택';
+    }
 }
 
 // 선택된 논문 다운로드
@@ -279,18 +322,27 @@ function hideLoading() {
 }
 
 function showError(message, type = 'error') {
-    errorMessage.textContent = message;
-    errorMessage.style.display = 'block';
+    const icon = type === 'success' ? 'check-circle' : 'alert-circle';
+    errorMessage.innerHTML = `
+        <i data-lucide="${icon}"></i>
+        <span>${message}</span>
+    `;
+    errorMessage.style.display = 'flex';
+    errorMessage.style.alignItems = 'center';
+    errorMessage.style.gap = '0.75rem';
     
     if (type === 'success') {
         errorMessage.style.backgroundColor = '#D1FAE5';
         errorMessage.style.color = '#065F46';
-        errorMessage.style.borderLeftColor = '#10B981';
+        errorMessage.style.borderColor = '#10B981';
     } else {
         errorMessage.style.backgroundColor = '#FEE2E2';
         errorMessage.style.color = '#DC2626';
-        errorMessage.style.borderLeftColor = '#EF4444';
+        errorMessage.style.borderColor = '#DC2626';
     }
+    
+    // Lucide 아이콘 다시 초기화
+    lucide.createIcons();
     
     // 화면 상단으로 스크롤
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -308,7 +360,16 @@ function escapeHtml(text) {
 
 function truncateText(text, maxLength) {
     if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
+    
+    // 마지막 완전한 단어에서 자르기
+    let truncated = text.substring(0, maxLength);
+    const lastSpace = truncated.lastIndexOf(' ');
+    
+    if (lastSpace > maxLength * 0.8) {
+        truncated = truncated.substring(0, lastSpace);
+    }
+    
+    return truncated.trim() + '...';
 }
 
 // 초기화
